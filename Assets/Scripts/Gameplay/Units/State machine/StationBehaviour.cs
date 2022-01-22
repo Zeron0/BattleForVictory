@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,34 @@ public class StationBehaviour : MonoBehaviour, IStateSwitcher
 {
     [SerializeField] private BaseUnit _unit;
 
-    private List<BaseState> _states;
+    private Dictionary<Type, BaseState> _states;
 
     private BaseState _currentState;
 
-    public void SwitchState<T>() where T : BaseState
+    public void Init()
+    {
+        _states = new Dictionary<Type, BaseState>();
+
+        _states[typeof(OffensiveState)] = new OffensiveState();
+        _states[typeof(DefenceState)] = new DefenceState();
+    }
+
+    public void SwitchState<T>(BaseState state) where T : BaseState
     {
         _currentState.Stop();
-        _currentState = _states.FirstOrDefault(s => s is T);
+        _currentState = state;
         _currentState.Start();
+    }
+
+    public void SwitchState<T>() where T : BaseState
+    {
+        throw new NotImplementedException();
+    }
+
+    private BaseState GetState<T>() where T : BaseState
+    {
+        Type type = typeof(T);
+
+        return _states[type];
     }
 }

@@ -14,9 +14,18 @@ public class FactionHandler
     [SerializeField] private UnitFactory _unitFactory;
 
     private IDisposable _disposable;
+    private FactionInfo _factionInfo;
 
-    private float _creatingInterval = 1f;
+    private float _minCreatingInterval = 1f;
+    private float _maxCreatingInterval = 3f;
     private bool _creationStarted;
+
+    public FactionInfo GetInfo => _factionInfo;
+
+    public void Init()
+    {
+        _factionInfo = new FactionInfo();
+    }
 
     public void StartCreatingUnits()
     {
@@ -25,12 +34,14 @@ public class FactionHandler
             return;
         }
 
-        _disposable = Observable.Interval(TimeSpan.FromSeconds(_creatingInterval))
+        _disposable = Observable.Interval(TimeSpan.FromSeconds(Random.Range(_minCreatingInterval, _maxCreatingInterval)))
             .Subscribe(_ =>
             {
                 UnitType type = GetUnitType();
                 BaseUnit unit = _unitFactory.Get(type, _factionData);
 
+                _factionInfo.OnUnitCreate();
+                unit.OnDestroy += _factionInfo.OnUnitDestroy;
                 SetUnitPosition(unit);
             });
     }

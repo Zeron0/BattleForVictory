@@ -5,6 +5,8 @@ using UnityEngine;
 
 public abstract class BaseUnit : MonoBehaviour, IDamageable, IFactionParticipant
 {
+    public event Action OnDestroy;
+
     [SerializeField] protected List<MeshRenderer> _meshRenderers;
 
     protected FactionData _factionData;
@@ -40,6 +42,8 @@ public abstract class BaseUnit : MonoBehaviour, IDamageable, IFactionParticipant
         if (_healthPoints <= 0)
         {
             _isDestroyed = true;
+            OnDestroy?.Invoke();
+
             Observable.Timer(TimeSpan.FromSeconds(DELAY_BEFORE_DESTRUCTION))
                 .Subscribe(_ =>
                 {
